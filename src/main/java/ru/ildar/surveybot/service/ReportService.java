@@ -1,7 +1,9 @@
 package ru.ildar.surveybot.service;
 
-import java.io.IOException;
+import org.springframework.scheduling.annotation.Async;
+import java.util.concurrent.CompletableFuture;
 
 public interface ReportService {
-    byte[] generateReportBytes() throws IOException;
+    @Async
+    CompletableFuture<byte[]> generateReportBytes();
 } 

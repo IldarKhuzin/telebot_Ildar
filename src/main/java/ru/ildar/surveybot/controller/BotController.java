@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -17,6 +18,7 @@ import ru.ildar.surveybot.util.EmailValidator;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class BotController extends TelegramLongPollingBot {
@@ -62,9 +64,13 @@ public class BotController extends TelegramLongPollingBot {
                     userStates.put(chatId, BotState.IDLE);
                     formBuffer.remove(chatId);
                     sendMessage(chatId, "Генерирую отчёт, пожалуйста, подождите...");
-                    // Генерация отчёта асинхронно (шаблон)
-                    // byte[] report = reportService.generateReportBytes();
-                    // sendDocument(chatId, report);
+                    reportService.generateReportBytes().thenAccept(report -> {
+                        if (report != null) {
+                            sendDocument(chatId, report, "report.docx");
+                        } else {
+                            sendMessage(chatId, "Ошибка при генерации отчёта.");
+                        }
+                    });
                     break;
                 default:
                     handleForm(chatId, text);
@@ -122,5 +128,14 @@ public class BotController extends TelegramLongPollingBot {
         }
     }
 
-    // Для отправки отчёта (Word-файл) реализовать sendDocument
+    private void sendDocument(Long chatId, byte[] fileBytes, String filename) {
+        try {
+            SendDocument sendDoc = new SendDocument();
+            sendDoc.setChatId(chatId.toString());
+            sendDoc.setDocument(new org.telegram.telegrambots.meta.api.objects.InputFile(new java.io.ByteArrayInputStream(fileBytes), filename));
+            execute(sendDoc);
+        } catch (Exception e) {
+            sendMessage(chatId, "Ошибка при отправке файла: " + e.getMessage());
+        }
+    }
 } 

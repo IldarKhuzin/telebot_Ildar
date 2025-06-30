@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ildar.surveybot.service.ReportService;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping("/api/report")
 public class ReportController {
@@ -21,17 +23,17 @@ public class ReportController {
     }
 
     @GetMapping
-    public ResponseEntity<ByteArrayResource> getReport() {
-        try {
-            byte[] data = reportService.generateReportBytes();
+    public CompletableFuture<ResponseEntity<ByteArrayResource>> getReport() {
+        return reportService.generateReportBytes().thenApply(data -> {
+            if (data == null) {
+                return ResponseEntity.internalServerError().build();
+            }
             ByteArrayResource resource = new ByteArrayResource(data);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=report.docx")
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(data.length)
                     .body(resource);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        });
     }
 } 
