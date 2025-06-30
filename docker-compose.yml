@@ -5,9 +5,11 @@ services:
     build: .
     container_name: telegram-survey-bot
     environment:
-      - DB_URL=jdbc:postgresql://db:5432/surveybot
-      - DB_USER=surveyuser
-      - DB_PASSWORD=surveypass
+      - DB_URL=jdbc:postgresql://db:5432/postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - TELEGRAM_BOT_TOKEN=7699108540:AAGK_HQugzmYct5JZua2gp_dXsJsMojLWKQ
+      - TELEGRAM_BOT_USERNAME=my_surveybot_bot
     volumes:
       - ./reports:/app/reports
     depends_on:
@@ -20,9 +22,9 @@ services:
     image: postgres:15
     container_name: surveybot-db
     environment:
-      - POSTGRES_DB=surveybot
-      - POSTGRES_USER=surveyuser
-      - POSTGRES_PASSWORD=surveypass
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: always

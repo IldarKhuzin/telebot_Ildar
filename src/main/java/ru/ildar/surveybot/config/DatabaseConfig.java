@@ -8,13 +8,13 @@ import javax.sql.DataSource;
 
 @Configuration
 public class DatabaseConfig {
-    @Value("${DB_URL}")
+    @Value("${DB_URL:jdbc:postgresql://localhost:5432/postgres}")
     private String url;
 
-    @Value("${DB_USER}")
+    @Value("${DB_USER:postgres}")
     private String username;
 
-    @Value("${DB_PASSWORD}")
+    @Value("${DB_PASSWORD:postgres}")
     private String password;
 
     @Bean

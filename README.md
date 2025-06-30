@@ -70,16 +70,16 @@ Spring Boot приложение для Telegram-бота:
    ```bash
    docker-compose up --build
    ```
-2. Бот автоматически подключится к PostgreSQL (db: surveybot, user: surveyuser, pass: surveypass).
+2. Бот автоматически подключится к PostgreSQL (db: postgres, user: postgres, pass: postgres).
 3. Для остановки:
    ```bash
    docker-compose down
    ```
 
 ## Переменные окружения
-- `DB_URL` — строка подключения к БД
-- `DB_USER` — пользователь БД
-- `DB_PASSWORD` — пароль БД
+- `DB_URL` — строка подключения к БД (по умолчанию: jdbc:postgresql://db:5432/postgres)
+- `DB_USER` — пользователь БД (по умолчанию: postgres)
+- `DB_PASSWORD` — пароль БД (по умолчанию: postgres)
 
 ## Пример отчёта
 | Имя | Email | Оценка |
