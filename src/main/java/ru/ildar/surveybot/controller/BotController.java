@@ -30,7 +30,8 @@ public class BotController extends TelegramLongPollingBot {
     private final Map<Long, UserEntity> formBuffer = new HashMap<>();
 
     @Autowired
-    public BotController(BotConfig botConfig, UserService userService, SurveyService surveyService, ReportService reportService) {
+    public BotController(BotConfig botConfig, UserService userService, SurveyService surveyService
+            , ReportService reportService) {
         super(botConfig.getBotToken());
         this.botConfig = botConfig;
         this.userService = userService;
@@ -53,7 +54,8 @@ public class BotController extends TelegramLongPollingBot {
                 case "/start":
                     userStates.put(chatId, BotState.IDLE);
                     formBuffer.remove(chatId);
-                    sendMessage(chatId, "Привет! Я бот-опросник. Используй /form для прохождения опроса или /report для получения отчёта.");
+                    sendMessage(chatId, "Привет! Я бот-опросник. Используй /form для прохождения опроса или " +
+                            "/report для получения отчёта.");
                     break;
                 case "/form":
                     userStates.put(chatId, BotState.WAIT_NAME);
@@ -132,7 +134,8 @@ public class BotController extends TelegramLongPollingBot {
         try {
             SendDocument sendDoc = new SendDocument();
             sendDoc.setChatId(chatId.toString());
-            sendDoc.setDocument(new org.telegram.telegrambots.meta.api.objects.InputFile(new java.io.ByteArrayInputStream(fileBytes), filename));
+            sendDoc.setDocument(new org.telegram.telegrambots.meta.api.objects.InputFile(new java.io.ByteArrayInputStream
+                    (fileBytes), filename));
             execute(sendDoc);
         } catch (Exception e) {
             sendMessage(chatId, "Ошибка при отправке файла: " + e.getMessage());
