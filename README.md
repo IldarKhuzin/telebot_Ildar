@@ -67,19 +67,39 @@ Spring Boot приложение для Telegram-бота:
 
 ## Быстрый старт (Docker Compose)
 1. Соберите и запустите проект:
-   ```bash
-   docker-compose up --build
-   ```
+```bash
+docker-compose up --build
+```
 2. Бот автоматически подключится к PostgreSQL (db: postgres, user: postgres, pass: postgres).
 3. Для остановки:
-   ```bash
-   docker-compose down
-   ```
+```bash
+docker-compose down
+```
 
-## Переменные окружения
-- `DB_URL` — строка подключения к БД (по умолчанию: jdbc:postgresql://db:5432/postgres)
-- `DB_USER` — пользователь БД (по умолчанию: postgres)
-- `DB_PASSWORD` — пароль БД (по умолчанию: postgres)
+## Настройка переменных окружения
+
+Перед запуском создайте файл `.env` в корне проекта (или скопируйте из шаблона):
+
+```bash
+cp .env.example .env
+```
+
+Заполните свои значения в `.env`:
+
+```
+DB_URL=jdbc:postgresql://db:5432/postgres
+DB_USER=postgres
+DB_PASSWORD=postgres
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+TELEGRAM_BOT_TOKEN=your_token_here
+TELEGRAM_BOT_USERNAME=your_bot_username
+```
+
+**Важно:** Никогда не коммитьте свой `.env` в репозиторий!
+
+Теперь запуск через Docker Compose будет использовать ваши значения.
 
 ## Порт приложения
 

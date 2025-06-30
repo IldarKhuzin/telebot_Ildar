@@ -3,13 +3,17 @@ version: '3.8'
 services:
   bot:
     build: .
-    container_name: telegram-survey-bot
+    container_name: survey-bot
+
+    env_file: .env
+
     environment:
-      - DB_URL=jdbc:postgresql://db:5432/postgres
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - TELEGRAM_BOT_TOKEN=7699108540:AAGK_HQugzmYct5JZua2gp_dXsJsMojLWKQ
-      - TELEGRAM_BOT_USERNAME=my_surveybot_bot
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev} # по умолчанию prod, для dev: SPRING_PROFILES_ACTIVE=dev
     volumes:
       - ./reports:/app/reports
     depends_on:
@@ -21,10 +25,13 @@ services:
   db:
     image: postgres:15
     container_name: surveybot-db
+
+    env_file: .env
+
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: always
