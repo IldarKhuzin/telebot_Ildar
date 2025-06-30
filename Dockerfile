@@ -1,14 +1,17 @@
 # Stage 1: Build
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+FROM maven:3.8.7-openjdk-17 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run
-FROM eclipse-temurin:17-jre
+FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar /app/app.jar
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Папка для временных отчетов
 RUN mkdir /app/reports
@@ -20,5 +23,3 @@ ENV DB_PASSWORD=surveypass
 ENV TELEGRAM_BOT_TOKEN=your_token_here
 
 VOLUME ["/app/reports"]
-
-ENTRYPOINT ["java", "-jar", "app.jar"]

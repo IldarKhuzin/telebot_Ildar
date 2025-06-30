@@ -2,32 +2,30 @@ version: '3.8'
 
 services:
   bot:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
+    build: .
     container_name: telegram-survey-bot
     environment:
-      - DB_URL=jdbc:postgresql://db:5432/surveydb
+      - DB_URL=jdbc:postgresql://db:5432/surveybot
       - DB_USER=surveyuser
       - DB_PASSWORD=surveypass
-      - TELEGRAM_BOT_TOKEN=your_token_here
     volumes:
       - ./reports:/app/reports
     depends_on:
       - db
+    restart: always
     networks:
       - survey-net
 
   db:
-    image: postgres:16
-    container_name: survey-postgres
-    restart: always
+    image: postgres:15
+    container_name: surveybot-db
     environment:
-      POSTGRES_DB: surveydb
-      POSTGRES_USER: surveyuser
-      POSTGRES_PASSWORD: surveypass
+      - POSTGRES_DB=surveybot
+      - POSTGRES_USER=surveyuser
+      - POSTGRES_PASSWORD=surveypass
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: always
     networks:
       - survey-net
 

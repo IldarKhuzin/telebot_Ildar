@@ -1,4 +1,6 @@
-elegram Survey Bot — это Telegram-бот для проведения опросов, сбора и хранения результатов в базе данных PostgreSQL, а также генерации отчётов в формате Word. Проект полностью контейнеризирован с помощью Docker и поддерживает асинхронную обработку задач.
+# telegram-survey-bot
+
+Java Spring Boot Telegram-бот для проведения опросов и генерации отчетов.
 
 ## Структура проекта
 
@@ -7,80 +9,85 @@ telegram-survey-bot/
 ├── src/
 │   ├── main/
 │   │   ├── java/ru/ildar/surveybot/
-│   │   │   ├── config/                # Конфигурации (бот, БД, асинхронность, отчёты)
-│   │   │   ├── controller/            # Контроллеры бота и отчётов
-│   │   │   ├── dto/                   # DTO для передачи данных
-│   │   │   ├── entity/                # JPA-сущности
-│   │   │   ├── enums/                 # Перечисления (состояния бота)
-│   │   │   ├── exception/             # Исключения
-│   │   │   ├── repository/            # Репозитории Spring Data JPA
-│   │   │   ├── service/               # Сервисы и их реализации
-│   │   │   ├── util/                  # Вспомогательные классы
-│   │   │   └── SurveyBotApplication.java # Главный класс приложения
+│   │   │   ├── config/
+│   │   │   │   ├── AsyncConfig.java
+│   │   │   │   ├── BotConfig.java
+│   │   │   │   ├── DatabaseConfig.java
+│   │   │   │   └── ReportConfig.java
+│   │   │   ├── controller/
+│   │   │   │   ├── BotController.java
+│   │   │   │   └── ReportController.java
+│   │   │   ├── dto/
+│   │   │   │   ├── SurveyDto.java
+│   │   │   │   └── UserDto.java
+│   │   │   ├── entity/
+│   │   │   │   ├── SurveyEntity.java
+│   │   │   │   └── UserEntity.java
+│   │   │   ├── enums/
+│   │   │   │   └── BotState.java
+│   │   │   ├── exception/
+│   │   │   │   ├── ReportGenerationException.java
+│   │   │   │   └── SurveyValidationException.java
+│   │   │   ├── repository/
+│   │   │   │   ├── SurveyRepository.java
+│   │   │   │   └── UserRepository.java
+│   │   │   ├── service/
+│   │   │   │   ├── ReportService.java
+│   │   │   │   ├── SurveyService.java
+│   │   │   │   ├── UserService.java
+│   │   │   │   └── impl/
+│   │   │   ├── util/
+│   │   │   │   ├── EmailValidator.java
+│   │   │   │   └── ReportGenerator.java
+│   │   │   └── SurveyBotApplication.java
 │   │   └── resources/
-│   │       ├── application.properties # Настройки приложения
-│   │       └── messages.properties    # Тексты сообщений бота
-│   └── test/                         # Тесты
-├── docker/                           # Docker-конфигурации
-│   ├── Dockerfile                    # Multi-stage Dockerfile
-│   └── entrypoint.sh                 # Скрипт запуска
-├── docker-compose.yml                # Конфигурация docker-compose
-└── README.md                         # Инструкции
+│   │       ├── application.properties
+│   │       └── messages.properties
+│   └── test/
+├── docker/
+│   └── entrypoint.sh
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
 ```
 
-## Быстрый старт
-
-### 1. Клонируйте репозиторий
-```bash
-git clone https://github.com/yourusername/telegram-survey-bot.git
-cd telegram-survey-bot
-```
-
-### 2. Настройте переменные окружения
-
-В файле `docker-compose.yml` укажите:
-- `TELEGRAM_BOT_TOKEN` — токен вашего Telegram-бота
-- (по желанию) параметры подключения к БД
-
-### 3. Соберите и запустите проект
-
-```bash
-docker-compose up --build
-```
-
-Бот и база данных будут запущены в отдельных контейнерах. Данные БД сохраняются в volume `pgdata`.
-
-### 4. Остановить проект
-```bash
-docker-compose down
-```
+## Описание
+Spring Boot приложение для Telegram-бота:
+- Опрос пользователей (/form: имя, email, оценка 1-10)
+- Валидация email
+- Генерация отчёта в Word (/report)
+- Асинхронная обработка отчётов
+- Сброс состояния при /start или /report
+- Сохранение данных в PostgreSQL
 
 ## Доступные команды бота
+- `/start` — приветственное сообщение
+- `/form` — начать опрос (имя, email, оценка)
+- `/report` — получить Word-отчёт с результатами
 
-- `/start` — приветственное сообщение, сбрасывает состояние формы
-- `/form` — запуск опроса (последовательно: имя → email → оценка 1-10)
-- `/report` — генерация и отправка Word-отчёта с результатами опросов
+## Быстрый старт (Docker Compose)
+1. Соберите и запустите проект:
+   ```bash
+   docker-compose up --build
+   ```
+2. Бот автоматически подключится к PostgreSQL (db: surveybot, user: surveyuser, pass: surveypass).
+3. Для остановки:
+   ```bash
+   docker-compose down
+   ```
 
-## Особенности реализации
+## Переменные окружения
+- `DB_URL` — строка подключения к БД
+- `DB_USER` — пользователь БД
+- `DB_PASSWORD` — пароль БД
 
-- **Асинхронная генерация отчёта** — отчёт формируется и отправляется в отдельном потоке, не блокируя работу бота
-- **Валидация email** — при заполнении формы email проверяется на корректность
-- **Сброс состояния** — если пользователь вызывает `/start` или `/report` во время заполнения формы, состояние сбрасывается
-- **Сохранение данных** — все пользователи и их ответы сохраняются в PostgreSQL
-- **Генерация Word-отчёта** — используется Apache POI для создания таблицы с результатами
-- **Контейнеризация** — проект полностью запускается через Docker Compose
+## Пример отчёта
+| Имя | Email | Оценка |
+|-----|-------|--------|
+| ... | ...   | ...    |
 
-## Пример .env (по желанию)
+---
 
-Можно создать файл `.env` для удобства:
-```
-TELEGRAM_BOT_TOKEN=your_token_here
-DB_URL=jdbc:postgresql://db:5432/surveydb
-DB_USER=surveyuser
-DB_PASSWORD=surveypass
-```
-
-## Требования
-- Java 17+
-- Maven 3.8+
-- Docker, Docker Compose
+**Для разработки:**
+- Java 17+, Maven
+- Spring Boot, Spring Data JPA, TelegramBots, Apache POI
