@@ -15,8 +15,14 @@ import ru.ildar.surveybot.service.UserService;
 import ru.ildar.surveybot.service.SurveyService;
 import ru.ildar.surveybot.service.ReportService;
 import ru.ildar.surveybot.util.EmailValidator;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -37,6 +43,19 @@ public class BotController extends TelegramLongPollingBot {
         this.userService = userService;
         this.surveyService = surveyService;
         this.reportService = reportService;
+        try {
+            execute(new SetMyCommands(
+                java.util.Arrays.asList(
+                    new BotCommand("/start", "Приветствие и сброс состояния"),
+                    new BotCommand("/form", "Пройти опрос"),
+                    new BotCommand("/report", "Получить отчёт")
+                ),
+                new BotCommandScopeDefault(),
+                null
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -54,8 +73,7 @@ public class BotController extends TelegramLongPollingBot {
                 case "/start":
                     userStates.put(chatId, BotState.IDLE);
                     formBuffer.remove(chatId);
-                    sendMessage(chatId, "Привет! Я бот-опросник. Используй /form для прохождения опроса или " +
-                            "/report для получения отчёта.");
+                    sendInlineKeyboard(chatId, "Привет! Я бот-опросник. Выберите действие:");
                     break;
                 case "/form":
                     userStates.put(chatId, BotState.WAIT_NAME);
@@ -76,6 +94,33 @@ public class BotController extends TelegramLongPollingBot {
                     break;
                 default:
                     handleForm(chatId, text);
+            }
+        } else if (update.hasCallbackQuery()) {
+            String data = update.getCallbackQuery().getData();
+            Long chatId = update.getCallbackQuery().getMessage().getChatId();
+            switch (data) {
+                case "START":
+                    userStates.put(chatId, BotState.IDLE);
+                    formBuffer.remove(chatId);
+                    sendInlineKeyboard(chatId, "Привет! Я бот-опросник. Выберите действие:");
+                    break;
+                case "FORM":
+                    userStates.put(chatId, BotState.WAIT_NAME);
+                    formBuffer.put(chatId, new UserEntity());
+                    sendMessage(chatId, "Введите ваше имя:");
+                    break;
+                case "REPORT":
+                    userStates.put(chatId, BotState.IDLE);
+                    formBuffer.remove(chatId);
+                    sendMessage(chatId, "Генерирую отчёт, пожалуйста, подождите...");
+                    reportService.generateReportBytes().thenAccept(report -> {
+                        if (report != null) {
+                            sendDocument(chatId, report, "report.docx");
+                        } else {
+                            sendMessage(chatId, "Ошибка при генерации отчёта.");
+                        }
+                    });
+                    break;
             }
         }
     }
@@ -139,6 +184,26 @@ public class BotController extends TelegramLongPollingBot {
             execute(sendDoc);
         } catch (Exception e) {
             sendMessage(chatId, "Ошибка при отправке файла: " + e.getMessage());
+        }
+    }
+
+    private void sendInlineKeyboard(Long chatId, String text) {
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rows = new java.util.ArrayList<>();
+        List<InlineKeyboardButton> row = new java.util.ArrayList<>();
+        row.add(InlineKeyboardButton.builder().text("Старт").callbackData("START").build());
+        row.add(InlineKeyboardButton.builder().text("Опрос").callbackData("FORM").build());
+        row.add(InlineKeyboardButton.builder().text("Отчёт").callbackData("REPORT").build());
+        rows.add(row);
+        markup.setKeyboard(rows);
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        message.setText(text);
+        message.setReplyMarkup(markup);
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 } 
