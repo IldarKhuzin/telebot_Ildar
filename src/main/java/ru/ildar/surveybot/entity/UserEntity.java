@@ -2,7 +2,6 @@ package ru.ildar.surveybot.entity;
 
 import jakarta.persistence.*;
 
-import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
