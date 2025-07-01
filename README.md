@@ -106,7 +106,7 @@ docker-compose down
 - `POSTGRES_PASSWORD` — пароль PostgreSQL (по умолчанию: `postgres`)
 - `TELEGRAM_BOT_TOKEN` — токен Telegram-бота
 - `TELEGRAM_BOT_USERNAME` — username Telegram-бота
-- `SPRING_PROFILES_ACTIVE` — профиль Spring Boot (`dev` или `prod`)
+- `SPRING_PROFILES_ACTIVE` — профиль Spring Boot (по умолчанию:`prod`)
 
 ## Порт приложения
 
@@ -125,6 +125,6 @@ docker-compose down
 - Java 17+, Maven
 - Spring Boot, Spring Data JPA, TelegramBots, Apache POI
 
-🧑‍💻 Автор
+**Автор:**
 Ильдар, 2025
 Проект реализован в рамках технического задания для прохождения собеседования.
