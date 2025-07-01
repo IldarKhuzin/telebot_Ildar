@@ -77,7 +77,7 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 TELEGRAM_BOT_TOKEN=your_token_here
 TELEGRAM_BOT_USERNAME=your_bot_username
-SPRING_PROFILES_ACTIVE=dev
+SPRING_PROFILES_ACTIVE=prod
 ```
 
 2. **Соберите и запустите проект:**
@@ -107,12 +107,6 @@ docker-compose down
 - `TELEGRAM_BOT_TOKEN` — токен Telegram-бота
 - `TELEGRAM_BOT_USERNAME` — username Telegram-бота
 - `SPRING_PROFILES_ACTIVE` — профиль Spring Boot (по умолчанию:`prod`)
-
-## Порт приложения
-
-По умолчанию приложение запускается на порту 8081. Если вы запускаете через Docker Compose или локально, доступ будет по адресу:
-
-    http://localhost:8081
 
 ## Пример отчёта
 | Имя | Email | Оценка |
